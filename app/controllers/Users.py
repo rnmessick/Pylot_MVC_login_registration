@@ -13,10 +13,10 @@ class Users(Controller):
         return self.load_view('index.html')
 
     def display_login_reg(self):
-        if 'val_errors' in session:
-            for error in session['val_errors']:
+        if 'validation_errors' in session:
+            for error in session['validation_errors']:
                 flash(error)
-            session.pop('val_errors')
+            session.pop('validation_errors')
         return self.load_view('index.html')
 
     def register(self):
@@ -27,7 +27,7 @@ class Users(Controller):
 
     def handle_login_reg_response(self, result):
         if type(result) == list:
-            session['val_errors'] = result
+            session['validation_errors'] = result
             return redirect('/')
         self.set_user_session(result)
         return redirect('/success')
@@ -44,7 +44,7 @@ class Users(Controller):
         return
 
     def success(self):
-        name = self.models['User'].fetch_user_by_id(id)
-        return self.load_view('success.html', name=name)
+        user = self.models['User'].fetch_user_by_id(id)
+        return self.load_view('success.html', user=user)
 
 

@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
+
+
 {% with messages = get_flashed_messages() %}
   {% if messages %}
     {% for message in messages %}
@@ -11,16 +13,18 @@
 <h1>Please Login or Register to Join the Magic!</h1>
 
 
-<form class="register" action="/register" method='post'>
-  Name: <input required type="text" name="name">
-  Email: <input type="email" name="email">
-  Password: <input type="password" name="password">
-  Password Confirm: <input type="password" name="password_confirm">
-  <input type="submit" value="Register">
-</form>
 <form class="login" action="/login" method='post'>
   Email: <input type="email" name="email">
   Password: <input type="password" name="password">
   <input type="submit" value="Login">
+</form>
+
+<form class="register" action="/register" method='post'>
+  Name: <input required type="text" name="name">
+  Alias: <input required type="text" name="alias">
+  Email: <input type="email" name="email">
+  Password: <input type="password" name="password">
+  Password Confirm: <input type="password" name="password_confirm">
+  <input type="submit" value="Register">
 </form>
 {% endblock %}

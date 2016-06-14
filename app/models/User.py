@@ -18,9 +18,9 @@ class User(Model):
         }
         self.queries = {
             'get_user_by_email' : "SELECT * FROM users WHERE email = :email LIMIT 1",
-            'create_user' : "INSERT INTO users (name, email, pw_hash, created_at, updated_at) VALUES ( :name, :email, :pw_hash, NOW(), NOW())",
-            'fetch_user_by_id': "SELECT id, name, email, admin_level FROM users WHERE id = :id",
-            'fetch_all_users' : "SELECT id, name, email, admin_level, created_at FROM users WHERE id != :id"
+            'create_user' : "INSERT INTO users (name, alias, email, pw_hash, created_at, updated_at) VALUES ( :name, :alias, :email, :pw_hash, NOW(), NOW())",
+            'fetch_user_by_id': "SELECT id, name, alias, email FROM users WHERE id = :id",
+            'fetch_all_users' : "SELECT id, name, alias, email, created_at FROM users WHERE id != :id"
         }
 
     def register(self, form_data):
@@ -31,6 +31,7 @@ class User(Model):
         query = self.queries['create_user']
         data = {
             'name' : form_data['name'],
+            'alias' : form_data['alias'],
             'email' : form_data['email'],
             'pw_hash' : pw_hash
         }
@@ -71,7 +72,7 @@ class User(Model):
         query = self.queries['fetch_user_by_id']
         data = { 'id' : id }
         result = self.db.query_db(query, data)
-        return result[0]
+        return result
         
     def get_user_by_email(self, email):
         query = self.queries['get_user_by_email']

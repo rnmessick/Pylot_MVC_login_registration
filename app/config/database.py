@@ -14,7 +14,7 @@ class DBConfig(object):
 class DevelopmentDBConfig(DBConfig):
     DB_USERNAME = 'root'
     DB_PASSWORD = 'root'
-    DB_DATABASE_NAME = 'login_registration_db'
+    DB_DATABASE_NAME = 'login_registration'
     DB_HOST = 'localhost'
     DB_PORT = 3306
     # """ unix_socket is used for connecting with MAMP. Take this out if you aren't using MAMP """
@@ -26,12 +26,12 @@ class DevelopmentDBConfig(DBConfig):
 class StagingDBConfig(DBConfig):
     DB_USERNAME = 'root'
     DB_PASSWORD = 'root'
-    DB_DATABASE_NAME = 'login_registration_db'
+    DB_DATABASE_NAME = 'login_registration'
     DB_HOST = 'localhost'
 
 """ Put Production Specific Configurations here """
 class ProductionDBConfig(DBConfig):
     DB_USERNAME = 'root'
     DB_PASSWORD = 'root'
-    DB_DATABASE_NAME = 'login_registration_db'
+    DB_DATABASE_NAME = 'login_registration'
     DB_HOST = 'localhost'
