@@ -18,7 +18,7 @@ CREATE SCHEMA IF NOT EXISTS `login_registration` DEFAULT CHARACTER SET utf8 ;
 USE `login_registration` ;
 
 -- -----------------------------------------------------
--- Table `login_registration_db`.`users`
+-- Table `login_registration`.`users`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `login_registration`.`users` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
