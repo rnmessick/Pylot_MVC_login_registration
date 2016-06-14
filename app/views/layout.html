@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Login & Registration</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/styles.css" type="text/css">
+  </head>
+  <body>
+    <div class="container">
+      <header>
+
+        <h1>Welcome to Pagan Book Reviews!</h1>
+        {% if 'user' in session %}
+        <nav>
+          <ul class="nav nav-tabs">
+            <li role="presentation"><a href="/dashboard">Dashboard</a></li>
+            <li role="presentation"><a href="/logout">Logout</a></li>
+          </ul>
+        </nav>
+        {% endif %}
+      </header>
+      {% block body %}{% endblock %}
+    </div>
+
+
+  </body>
+</html>

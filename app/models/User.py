@@ -1,61 +1,97 @@
 
 from system.core.model import Model
-from flask import session, request
-from flask.ext.bcrypt import Bcrypt
+import re
+
+EMAIL_REGEX = re.compile(r'^[a-za-z0-9\.\+_-]+@[a-za-z0-9\._-]+\.[a-za-z]*$')
 
 class User(Model):
     def __init__(self):
         super(User, self).__init__()
-
-
-    def registration(self):
-        user_info = {
-        "first_name" : request.form['first_name'], 
-        "last_name" : request.form['last_name'], 
-        "email" : request.form['email'], 
+        self.validation_errors = {
+            'name_exist' : "Name can't be blank",
+            'email_exist' : "Email can't be blank",
+            'email_valid' : "Email must be valid.",
+            'password_exist' : "Password can't be blank",
+            'password_match' : "Passwords must match",
+            'email_taken' : "Email already in use",
+            'login_fail' : "Email/password don't match"
         }
-        password = request.form['password']
-    # run validations and if they are successful we can create the password hash with bcrypt
-        pw_hash = self.bcrypt.generate_password_hash(password)
-    # now we insert the new user into the database
-        create_query = "INSERT INTO users (first_name, last_name, email, pw_hash, created_at, updated_at) VALUES (:first_name, :last_name, :email, :pw_hash, NOW(), NOW())"
-        create_data = { 'first_name': request.form['first_name'], 'last_name':request.form['last_name'], 'email': request.form['email'], 'pw_hash': pw_hash }
-        self.db.query_db(create_query, create_data)
+        self.queries = {
+            'get_user_by_email' : "SELECT * FROM users WHERE email = :email LIMIT 1",
+            'create_user' : "INSERT INTO users (name, email, pw_hash, created_at, updated_at) VALUES ( :name, :email, :pw_hash, NOW(), NOW())",
+            'fetch_user_by_id': "SELECT id, name, email, admin_level FROM users WHERE id = :id",
+            'fetch_all_users' : "SELECT id, name, email, admin_level, created_at FROM users WHERE id != :id"
+        }
 
-    def register_validation(self, form):
-        if len(request.form['first_name']) < 2 or len(request.form['last_name']) < 2:
-            flash("Name must be greater than 2 letters!")
-            return redirect("/")
-        if (request.form['first_name']).isalpha() == False or (request.form['last_name']).isalpha() == False:
-            flash("Name cannot contain any numbers.")
-        if len(request.form["email"]) < 1:
-            flash("Email cannot be blank!")
-        elif not EMAIL_REGEX.match(request.form["email"]):
-            flash("Invalid Email Address!")
-        if len(request.form["password"]) < 8:
-            flash("Invalid Password. Try again.")
-        elif (request.form["password"]) != (request.form["confirm"]):
-            flash("Passwords do not match.")
-        else:
-            # Code to insert user goes here...
-            # Then retrieve the last inserted user.
-            get_user_query = "SELECT * FROM users ORDER BY id DESC LIMIT 1"
-            users = self.db.query_db(get_user_query)
-            return { "status": True, "user": users[0] }
+    def register(self, form_data):
+        # Encrypt password
+        pw_hash = self.bcrypt.generate_password_hash(form_data['password'])
 
-       
+        # Make a DB query to create a user
+        query = self.queries['create_user']
+        data = {
+            'name' : form_data['name'],
+            'email' : form_data['email'],
+            'pw_hash' : pw_hash
+        }
 
-    def login(self, form):
-        email = request.form['email']
-        password = request.form['password']
-        user_query = "SELECT * FROM users WHERE email = :email LIMIT 1"
-        user_data = { 'email': request.form['email'] }
-        user = self.db.query_db(user_query, user_data).fetchone()
-        if user:
+        result = self.db.query_db(query, data)
 
-            if bcrypt.check_password_hash(user.pw_hash, password):
-                return user
-        else:
-            flash("Invalid Password. Please try again.")
+        return self.fetch_user_by_id(result)
+
+
+    def validate_reg_info(self, form_data):
+        errors = []
+
+        if len(form_data['name']) < 1:
+            errors.append(self.validation_errors['name_exist'])
+        if len(form_data['email']) < 1:
+            errors.append(self.validation_errors['email_exist'])
+        if not EMAIL_REGEX.match(form_data['email']):
+            errors.append(self.validation_errors['email_valid'])
+        if len(form_data['password']) < 1:
+            errors.append(self.validation_errors['password_exist'])
+        if form_data['password'] != form_data['password_confirm']:
+            errors.append(self.validation_errors['password_match'])
+
+        # Do errors exists? If so, don't both with DB query...
+        if len(errors) > 0:
+            return errors
+
+        result = self.get_user_by_email(form_data['email'])
+
+        if len(result) > 0:
+            errors.append(self.validation_errors['email_taken'])
+            return errors
+
+        # If we're here, we know all validations passed
+        return self.register(form_data)
+
+    def fetch_user_by_id(self, id):
+        query = self.queries['fetch_user_by_id']
+        data = { 'id' : id }
+        result = self.db.query_db(query, data)
+        return result[0]
         
-        return False
+    def get_user_by_email(self, email):
+        query = self.queries['get_user_by_email']
+        data = { 'email' : email }
+        return self.db.query_db(query, data)      
+
+    def login(self, form_data):
+        result = self.get_user_by_email(form_data['email'])
+
+        password = form_data['password']
+        pw_hash = result[0]['pw_hash']
+
+        test_password_result = self.bcrypt.check_password_hash(pw_hash, password)
+
+        if test_password_result == False:
+            return [self.validation_errors['login_fail']]
+        else:
+            return {
+                'id' : result[0]['id'],
+                'name' : result[0]['name'],
+                'email' : result[0]['email'],
+
+            }

@@ -12,27 +12,39 @@ class Users(Controller):
     def index(self):
         return self.load_view('index.html')
 
-    def registration(self):
-        user_info = {
-        "first_name" : request.form['first_name'], 
-        "last_name" : request.form['last_name'], 
-        "email" : request.form['email'], 
-        "password" : request.form['password']
-        }
-        self.models['User'].registration()
+    def display_login_reg(self):
+        if 'val_errors' in session:
+            for error in session['val_errors']:
+                flash(error)
+            session.pop('val_errors')
+        return self.load_view('index.html')
+
+    def register(self):
+  
+        validation_result = self.models['User'].validate_reg_info(request.form)
+
+        return self.handle_login_reg_response(validation_result)
+
+    def handle_login_reg_response(self, result):
+        if type(result) == list:
+            session['val_errors'] = result
+            return redirect('/')
+        self.set_user_session(result)
+        return redirect('/success')
+    def login(self):
+        login_result = self.models['User'].login(request.form)
+        return self.handle_login_reg_response(login_result)
+
+    def logout(self):
+        session.clear()
         return redirect('/')
 
-    def login(self):
-        user_info = {
-        "first_name" : request.form['first_name'], 
-        "last_name" : request.form['last_name'], 
-        "email" : request.form['email'], 
-        }
-        self.models['User'].login(user_info)
-        return redirect('/success')
+    def set_user_session(self, validation_result):
+        session['user'] = validation_result
+        return
 
     def success(self):
-        email = request.form['email']
-        return self.load_view('success.html', email=email)
+        name = self.models['User'].fetch_user_by_id(id)
+        return self.load_view('success.html', name=name)
 
 

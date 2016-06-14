@@ -1,31 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Registration Form</title>
-</head>
-<body>
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      {% for message in messages %}
-        <p>{{message}}</p>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-	<h2>Register</h2>  
-	<form action="/registration" method="POST">
-		First Name:<input type="text" name="first_name">
-		Last Name:<input type="text" name="last_name">
-		Email:<input type="text" name="email">
-		Password:<input type="text" name="password">
-		Confirm Password:<input type="text" name="confirm">
-		<input type="submit" name="Submit">
-	</form>
+{% extends "layout.html" %}
+{% block body %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      <p class='error'>{{message}}</p>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
-	<h2>Login</h2>
-	<form action="/success" method="POST">
-		Email:<input type="text" name="email">
-		Password:<input type="text" name="password">
-		<input type="submit" name="submit">
-	</form>
-</body> 
-</html>
+<h1>Please Login or Register to Join the Magic!</h1>
+
+
+<form class="register" action="/register" method='post'>
+  Name: <input required type="text" name="name">
+  Email: <input type="email" name="email">
+  Password: <input type="password" name="password">
+  Password Confirm: <input type="password" name="password_confirm">
+  <input type="submit" value="Register">
+</form>
+<form class="login" action="/login" method='post'>
+  Email: <input type="email" name="email">
+  Password: <input type="password" name="password">
+  <input type="submit" value="Login">
+</form>
+{% endblock %}
